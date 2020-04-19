@@ -15,6 +15,16 @@ some sort of build automator - oh well for now.
 * issue: docker-compose -f compose.yml build
 * followed by: docker-compose -f compose.yml up
 
+From time to time, you will want to clean out your docker image cache.  Over time a large number of orphan images will accomulate and waste disk space.  TO go nuclear on the whole system use:
+
+* docker system prune -a
+
+To be more selective, use:
+
+* docker images - which will show you a list of container ids
+* docker rmi <container id>
+
+
 # How does it work?
 
 First, let's be clear, the browser does not know about environment variables.  These are a server side concept.

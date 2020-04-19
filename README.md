@@ -15,7 +15,22 @@ In the browser, these environment variable are simulated by the packager, webpac
 
 # How to set this up?
 
-In the Dockerfile, the first stage, called builder, uses an alpine node image to build the React app.
+In the Dockerfile, the first stage, called builder, uses an alpine node image to build the React app.  This first stage simply: 
+
+* establishes a WORKDIR of /app
+* copy the package.json and package-lock.json into the WORKDIR
+* installs the node dependencies from the package.json file (using a silent run)
+* builds a production, minimized version of the application and places this in a directory called /app/build
+* introduce an argument "REACT_APP_IP_ADDRESS"
+* inject REACT_APP_IP_ADDRESS into the environment of the container
+
+The second stage of the build then creates the final container image.  This stage:
+
+* starts with nginx
+* overlays a new config for nginx to use
+* copies the /app/build dir from the first stage and places it so nginx can serve it as static files.
+* open port 80 on the container
+* run nginx
 
 This is the Dockerfile
 
@@ -54,6 +69,12 @@ line 8-10 establish an environment variable: REACT_APP_IP_ADDRESS.
 
 If you use docker build and then "rip" the image apart you could find the environment variables exposed.  But, what we want is to use docker-compose and pass these through to the application.
 
+# How to setup docker-compose 
+
+We eventually want to build this system with a CI/CD pipeline, like Jenkins or Earthly or Spinaker.  We do not want to depend on external scripts to magically fix IPs or anything else.
+
+Eventially we'll run this system under NOMAD and Kubernetes, so we want our solution to depend only on docker and its configuration.  For example both NOMAD and the kubernetes ecosystems automatically translate docker-compose configuration files into helm charts (i.e. their internal configuration).
+
 This is the compose file.
 
 ~~~
@@ -67,9 +88,9 @@ services:
       dockerfile: Dockerfile
       args:
         - REACT_APP_IP_ADDRESS=${IP_ADDRESS}
-    # environment:
-    #     - REACT_APP_IP_ADDRESS
     ports:
       - "80:80"
 
 ~~~
+
+Please notice that the compose file introduces an argument (with the ARGS verb).  In this case the ARGS reference something called ${IP_ADDRESS}.  That variable has to be exported (bash syntax) into the environment (export IP_ADDRESS=192.168.0.1 or export IP_ADDRESS=localhost).

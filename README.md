@@ -10,7 +10,7 @@ some sort of build automator - oh well for now.
 # To Run
 
 * clone the repo
-* export IP_ADDRESS=localhost
+* edit and source the file: env_template.  Enter your hostname (e.g. IP_ADDRESS=localhost or IP_ADDRESS=192.168.17.6)
 * issue: docker-compose -f compose.yml build
 * followed by: docker-compose -f compose.yml up
 

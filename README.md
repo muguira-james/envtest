@@ -9,6 +9,7 @@ some sort of build automator - oh well for now.
 
 # To Run
 
+* open a terminal
 * clone the repo
 * edit and source the file: env_template.  Enter your hostname (e.g. IP_ADDRESS=localhost or IP_ADDRESS=192.168.17.6)
 * issue: docker-compose -f compose.yml build
@@ -106,7 +107,7 @@ Please notice that the compose file introduces an argument (with the ARGS verb).
 
 # nginx
 
-The nginx config file is nothing special.  It simply tells nginx to serve index.html files from it standard directoy
+The nginx config file is nothing special.  It simply tells nginx to serve index.html files from it standard directoy. One key thing to note: the app is served and exposed on port 80, just like a standard web server.  The compose file tells docker to expose the container port 80 on the host port 80 so that a browser can hit http://localhost and recieve the app.  If you look at the log on the terminal you ran this from you will see all of the files in the build dir served.
 
 ~~~
 

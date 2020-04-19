@@ -94,3 +94,29 @@ services:
 ~~~
 
 Please notice that the compose file introduces an argument (with the ARGS verb).  In this case the ARGS reference something called ${IP_ADDRESS}.  That variable has to be exported (bash syntax) into the environment (export IP_ADDRESS=192.168.0.1 or export IP_ADDRESS=localhost).
+
+# nginx
+
+The nginx config file is nothing special.  It simply tells nginx to serve index.html files from it standard directoy
+
+~~~
+
+server {
+
+  listen 80;
+
+  location / {
+    root   /usr/share/nginx/html;
+    index  index.html index.htm;
+    try_files $uri $uri/ /index.html;
+  }
+
+  error_page   500 502 503 504  /50x.html;
+
+  location = /50x.html {
+    root   /usr/share/nginx/html;
+  }
+
+}
+
+~~~

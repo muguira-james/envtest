@@ -22,7 +22,7 @@ From time to time, you will want to clean out your docker image cache.  Over tim
 To be more selective, use:
 
 * docker images - which will show you a list of container ids
-* docker rmi <container id>
+* docker rmi "container id"
 
 
 # How does it work?

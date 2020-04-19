@@ -18,7 +18,7 @@ some sort of build automator - oh well for now.
 
 First, let's be clear, the browser does not know about environment variables.  These are a server side concept.
 
-In the browser, these environment variable are simulated by the packager, webpack.  The React ecosystem has a convention, to prefix environment variables with "REACT_APP_".  What REALLY happens is webpack gathers up all of the environment (if you use unix / bash, what you get with the "set" cmd) and creates variables on the window object, which is exposed in the browser javascript run environment.  In your React code, you can investigate "process.env" and see a number of items.  Of course you will see REACT_APP_* variables.
+In the browser, these environment variables are simulated by the packager, webpack.  The React ecosystem has a convention, to prefix environment variables with "REACT_APP_".  What REALLY happens is webpack gathers up all of the environment (if you use unix / bash, what you get with the "set" cmd) and creates variables on the window object, which is exposed in the browser javascript run environment.  In your React code, you can investigate "process.env" and see a number of items.  Of course, you will see REACT_APP_* variables.
 
 # How to set this up?
 
@@ -44,6 +44,7 @@ This is the Dockerfile
 ~~~
 
 # => Build container
+# ----------------  1st stage ------------------------
 FROM node:alpine as builder
 WORKDIR /app
 COPY package.json .
@@ -58,6 +59,7 @@ COPY . .
 RUN npm run build --silent
 
 # build the final container that hosts the app from nginx
+# ----------------  2nd stage ------------------------
 FROM nginx:1.15.2-alpine
 
 # Nginx config

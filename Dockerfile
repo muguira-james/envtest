@@ -1,5 +1,6 @@
 
 # => Build container
+# ----------------  1st stage ------------------------
 FROM node:alpine as builder
 WORKDIR /app
 COPY package.json .
@@ -14,6 +15,7 @@ COPY . .
 RUN npm run build --silent
 
 # build the final container that hosts the app from nginx
+# ----------------  2nd stage ------------------------
 FROM nginx:1.15.2-alpine
 
 # Nginx config

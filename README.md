@@ -7,6 +7,13 @@ This all starts in the Dockerfile.  This project uses a multi-stage build to cre
 The intermediate stage, turns into an orphan and unfortunately it is 441MB.  This orphan would not be created if I was using 
 some sort of build automator - oh well for now.
 
+# to Run
+
+* clone the repo
+* export IP_ADDRESS=localhost
+* use docker-compose -f compose.yml build
+* followed by docker-compose -f compose.yml up
+
 # How does it work?
 
 First, let's be clear, the browser does not know about environment variables.  These are a server side concept.

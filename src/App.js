@@ -3,12 +3,13 @@ import logo from './logo.svg';
 import './App.css';
 
 function App() {
+  let ip = process.env.REACT_APP_IP_ADDRESS 
   return (
     <div className="App">
       <header className="App-header">
         <img src={logo} className="App-logo" alt="logo" />
         <p>
-          Edit <code>src/App.js</code> and save to reload.
+          ip = {ip }
         </p>
         <a
           className="App-link"

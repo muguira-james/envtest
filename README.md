@@ -1,68 +1,75 @@
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+# Introduction
 
-## Available Scripts
+The simplest way to get env variables to a browser based app
 
-In the project directory, you can run:
+This all starts in the Dockerfile.  This project uses a multi-stage build to create a final 19MB nginx hosted React app.
 
-### `yarn start`
+The intermediate stage, turns into an orphan and unfortunately it is 441MB.  This orphan would not be created if I was using 
+some sort of build automator - oh well for now.
 
-Runs the app in the development mode.<br />
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+# How does it work?
 
-The page will reload if you make edits.<br />
-You will also see any lint errors in the console.
+First, let's be clear, the browser does not know about environment variables.  These are a server side concept.
 
-### `yarn test`
+In the browser, these environment variable are simulated by the packager, webpack.  The React ecosystem has a convention, to prefix environment variables with "REACT_APP_".  What REALLY happens is webpack gathers up all of the environment (if you use unix / bash, what you get with the "set" cmd) and creates variables on the window object, which is exposed in the browser javascript run environment.  In your React code, you can investigate "process.env" and see a number of items.  Of course you will see REACT_APP_* variables.
 
-Launches the test runner in the interactive watch mode.<br />
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+# How to set this up?
 
-### `yarn build`
+In the Dockerfile, the first stage, called builder, uses an alpine node image to build the React app.
 
-Builds the app for production to the `build` folder.<br />
-It correctly bundles React in production mode and optimizes the build for the best performance.
+This is the Dockerfile
 
-The build is minified and the filenames include the hashes.<br />
-Your app is ready to be deployed!
+~~~
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+# => Build container
+FROM node:alpine as builder
+WORKDIR /app
+COPY package.json .
+COPY package-lock.json .
+RUN npm i --silent
 
-### `yarn eject`
+ARG REACT_APP_IP_ADDRESS
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+ENV REACT_APP_IP_ADDRESS $REACT_APP_IP_ADDRESS
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+COPY . .
+RUN npm run build --silent
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+# build the final container that hosts the app from nginx
+FROM nginx:1.15.2-alpine
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+# Nginx config
+COPY nginx/nginx.conf /etc/nginx/conf.d/default.conf
 
-## Learn More
+# Static build from the previous builder stage
+COPY --from=builder /app/build /usr/share/nginx/html
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]
+~~~
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+Lines 1-7 setup and install dependencies from package.json.
 
-### Code Splitting
+line 8-10 establish an environment variable: REACT_APP_IP_ADDRESS.
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/code-splitting
+If you use docker build and then "rip" the image apart you could find the environment variables exposed.  But, what we want is to use docker-compose and pass these through to the application.
 
-### Analyzing the Bundle Size
+This is the compose file.
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size
+~~~
 
-### Making a Progressive Web App
+version: '3'
+services:
+  frontend:
+    container_name: ui
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - REACT_APP_IP_ADDRESS=${IP_ADDRESS}
+    # environment:
+    #     - REACT_APP_IP_ADDRESS
+    ports:
+      - "80:80"
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app
-
-### Advanced Configuration
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/advanced-configuration
-
-### Deployment
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/deployment
-
-### `yarn build` fails to minify
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify
+~~~

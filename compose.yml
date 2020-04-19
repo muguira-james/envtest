@@ -1,0 +1,13 @@
+version: '3'
+services:
+  frontend:
+    container_name: ui
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - REACT_APP_IP_ADDRESS=${IP_ADDRESS}
+    # environment:
+    #     - REACT_APP_IP_ADDRESS
+    ports:
+      - "80:80"

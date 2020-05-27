@@ -11,7 +11,7 @@ function App() {
         <p>
           ip = {ip }
         </p>
-        <p>out'a here - this time? this time?</p>
+        <p>it works</p>
       </header>
     </div>
   );

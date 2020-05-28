@@ -11,7 +11,7 @@ function App() {
         <p>
           ip = {ip }
         </p>
-        <p>it works - why? THIS IS WHY why</p>
+        <p>it works finally!</p>
       </header>
     </div>
   );
